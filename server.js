@@ -22,8 +22,8 @@ const PORT = process.env.PORT || 5000;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || null;
 const USER_AGENT = "GitHub-Analyzer-Tool/1.0";
 
-console.log("✅ GEMINI API KEY Loaded:", !!process.env.GEMINI_API_KEY);
-console.log("✅ GITHUB TOKEN Loaded:", !!GITHUB_TOKEN);
+// console.log("✅ GEMINI API KEY Loaded:", !!process.env.GEMINI_API_KEY);
+// console.log("✅ GITHUB TOKEN Loaded:", !!GITHUB_TOKEN);
 
 // -----------------------------------
 // EXTENSION -> LANGUAGE MAP
@@ -368,30 +368,30 @@ function buildSkillCategories(languageCounts = {}) {
 // GITHUB ANALYSIS ROUTE
 app.get("/analyze", async (req, res) => {
   const input = req.query.user;
-  console.log("➡️ [GET /analyze] Incoming request:", input);
+  // console.log("➡️ [GET /analyze] Incoming request:", input);
   if (!input) {
-    console.log("⚠️ [GET /analyze] Missing user param");
+    // console.log("⚠️ [GET /analyze] Missing user param");
     return res.status(400).json({ error: "Provide ?user=username" });
   }
 
   const username = extractUsername(input);
-  console.log("👤 [GET /analyze] Resolved username:", username);
+  // console.log("👤 [GET /analyze] Resolved username:", username);
 
   const profile = await fetchUserProfile(username);
   if (!profile) {
-    console.log("❌ [GET /analyze] Profile not found for", username);
+    // console.log("❌ [GET /analyze] Profile not found for", username);
     return res.status(404).json({ error: "User not found" });
   }
 
   const repos = await fetchUserRepos(username);
   if (!repos) {
-    console.log("❌ [GET /analyze] No repos found for", username);
+    // console.log("❌ [GET /analyze] No repos found for", username);
     return res.status(404).json({ error: "No repos found" });
   }
 
   const repoAnalyses = [];
   for (const repo of repos) {
-    console.log("🔍 [GET /analyze] Analyzing repo:", repo.name);
+    // console.log("🔍 [GET /analyze] Analyzing repo:", repo.name);
     const analysis = await analyzeRepo(username, repo);
     repoAnalyses.push(analysis);
   }
@@ -429,14 +429,14 @@ app.get("/analyze", async (req, res) => {
     techStackHighlights: charts.languageUsage.slice(0, 6).map((item) => item.label),
   };
 
-  console.log("✅ [GET /analyze] Response payload:", JSON.stringify(payload));
+  // console.log("✅ [GET /analyze] Response payload:", JSON.stringify(payload));
   res.json(payload);
 });
 
 // AI SKILL ANALYZER ROUTE
 app.post("/ai/skill-analysis", async (req, res) => {
   try {
-    console.log("➡️ [POST /ai/skill-analysis] Payload:", JSON.stringify(req.body));
+    // console.log("➡️ [POST /ai/skill-analysis] Payload:", JSON.stringify(req.body));
     const githubData = req.body;
 
     // Limit size to prevent Gemini API overload
@@ -448,7 +448,7 @@ app.post("/ai/skill-analysis", async (req, res) => {
       success: true,
       ai_analysis: aiResult
     };
-    console.log("✅ [POST /ai/skill-analysis] Response:", JSON.stringify(responsePayload));
+    // console.log("✅ [POST /ai/skill-analysis] Response:", JSON.stringify(responsePayload));
 
     res.json(responsePayload);
 
@@ -468,20 +468,20 @@ const { runFullAIPipeline } = require("./pipeline.controller");
 
 app.post("/ai/full-analysis", async (req, res) => {
   try {
-    console.log("➡️ [POST /ai/full-analysis] Request received");
+    // console.log("➡️ [POST /ai/full-analysis] Request received");
     
     // Extract profileData from request body (frontend sends { profileData })
     const githubData = req.body.profileData || req.body;
     
     if (!githubData || Object.keys(githubData).length === 0) {
-      console.log("⚠️ [POST /ai/full-analysis] Invalid request: no data provided");
+      // console.log("⚠️ [POST /ai/full-analysis] Invalid request: no data provided");
       return res.status(400).json({ 
         success: false, 
         error: "Invalid request: profileData is required" 
       });
     }
 
-    console.log("📥 [POST /ai/full-analysis] Processing GitHub data for:", githubData.username || "unknown");
+    // console.log("📥 [POST /ai/full-analysis] Processing GitHub data for:", githubData.username || "unknown");
     
     const result = await runFullAIPipeline(githubData);
 
@@ -492,7 +492,7 @@ app.post("/ai/full-analysis", async (req, res) => {
       visualizations: result.charts,
       logs: result.logs
     };
-    console.log("✅ [POST /ai/full-analysis] Response generated successfully");
+    // console.log("✅ [POST /ai/full-analysis] Response generated successfully");
 
     res.json(responsePayload);
   } catch (err) {
